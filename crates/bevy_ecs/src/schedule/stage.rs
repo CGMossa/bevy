@@ -84,6 +84,7 @@ pub struct SystemStage {
 }
 
 impl SystemStage {
+    /// Return a [SystemStage] equipped with parallel executor.
     pub fn new(executor: Box<dyn ParallelSystemExecutor>) -> Self {
         SystemStage {
             world_id: None,
@@ -105,14 +106,17 @@ impl SystemStage {
         }
     }
 
+    /// Returns a single-threaded [SystemStage] with a single system.
     pub fn single(system: impl Into<SystemDescriptor>) -> Self {
         Self::single_threaded().with_system(system)
     }
-
+    
+    /// Returns a single-threaded [SystemStage].
     pub fn single_threaded() -> Self {
         Self::new(Box::new(SingleThreadedExecutor::default()))
     }
 
+    /// Returns a parallel based [SystemStage].
     pub fn parallel() -> Self {
         Self::new(Box::new(ParallelExecutor::default()))
     }
@@ -131,11 +135,13 @@ impl SystemStage {
         self.executor = executor;
     }
 
+    /// Amends the system `system` to the [SystemStage].
     pub fn with_system(mut self, system: impl Into<SystemDescriptor>) -> Self {
         self.add_system(system);
         self
     }
 
+    /// Adds a system to the [SystemStage]
     pub fn add_system(&mut self, system: impl Into<SystemDescriptor>) -> &mut Self {
         self.add_system_inner(system, None);
         self
@@ -239,6 +245,7 @@ impl SystemStage {
         self
     }
 
+    /// Adds a [SystemSet] to the [SystemStage].
     pub fn add_system_set(&mut self, system_set: SystemSet) -> &mut Self {
         self.systems_modified = true;
         let (run_criteria, mut systems) = system_set.bake();
